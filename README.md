@@ -17,4 +17,8 @@ Project has two pods
 1. 'XMLParsing' -> for parsing XML
 2. 'SwiftSpinner' -> for showing loader
 
-How to run the project : Just checkout the project and install the pod and open in xcode(v12.4) and run 😄 😄 😄
+How to run the project : 
+-> Just checkout the project 
+-> install the pod 
+-> open in xcode(v12.4) 
+-> run 😄 😄 😄
