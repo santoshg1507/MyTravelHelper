@@ -29,3 +29,5 @@ Completed task in Assignment
 2: Added core data for storage
 3: Added favorite functionality  
 4: Unit Test Case for interactor
+
+Thank you!!
