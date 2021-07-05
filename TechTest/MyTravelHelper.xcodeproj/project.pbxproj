@@ -134,6 +134,8 @@
 		2303CD7826938873004B355C /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				753C8FBB223731E3005FF13B /* Reachability.swift */,
+				753F087022361A6500175107 /* AppConstants.swift */,
 				2303CD7926938895004B355C /* StationTrainRouter.swift */,
 			);
 			path = Network;
@@ -316,8 +318,6 @@
 			isa = PBXGroup;
 			children = (
 				2303CD7826938873004B355C /* Network */,
-				753C8FBB223731E3005FF13B /* Reachability.swift */,
-				753F087022361A6500175107 /* AppConstants.swift */,
 				753C8FB422367D1C005FF13B /* AppUtils.swift */,
 				753C8FB622367DF4005FF13B /* ProgressIndicator.swift */,
 			);
