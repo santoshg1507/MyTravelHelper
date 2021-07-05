@@ -13,7 +13,7 @@ Programming Approach: Protocol oriented programming
 
 Architecture : VIPER (Clean architecture)
 
-Project has two two pods
+Project has two pods
 1. 'XMLParsing' -> for parsing XML
 2. 'SwiftSpinner' -> for showing loader
 
