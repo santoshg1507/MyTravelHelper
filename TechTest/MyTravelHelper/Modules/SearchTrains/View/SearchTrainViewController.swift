@@ -42,6 +42,7 @@ class SearchTrainViewController: BaseViewController {
     }
 
     @IBAction func searchTrainsTapped(_ sender: Any) {
+        self.view.endEditing(true)
         self.searchFlag = true
         self.tableView.reloadData()
         self.sourceBtn.backgroundColor = UIColor.clear
@@ -154,7 +155,7 @@ extension SearchTrainViewController:UITableViewDataSource,UITableViewDelegate {
 extension SearchTrainViewController {
     
     func datePickerSetup() {
-        dateTxtField.setupDatePickerTextField(mode: .date, dateformat: "dd-MMM-yyyy", maxDate: Date().addDays(60), minDate: Date().addDays(-1) , selectionDelegate: nil)
+        dateTxtField.setupDatePickerTextField(mode: .date, dateformat: "dd-MMM-yyyy", maxDate: Date().addDays(60), minDate: Date().addDays(-7) , selectionDelegate: nil)
         dateTxtField.addToolbar()
         self.onTappedTextFieldBtn(sender: self.sourceBtn)
     }
