@@ -14,10 +14,11 @@ protocol ViewToPresenterProtocol: class{
     var router: PresenterToRouterProtocol? {get set}
     func fetchallStations()
     func searchTapped(source: String, destination: String, date: String)
+    func updateFaviroteFlagFor(station: StationName)
 }
 
 protocol PresenterToViewProtocol: class{
-    func saveFetchedStations(stations:[Station]?)
+    func saveFetchedStations(stations:[StationName]?)
     func showInvalidSourceOrDestinationAlert()
     func updateLatestTrainList(trainsList: [StationTrain])
     func showNoTrainsFoundAlert()
@@ -33,12 +34,13 @@ protocol PresenterToInteractorProtocol: class {
     var presenter:InteractorToPresenterProtocol? {get set}
     func fetchallStations()
     func fetchTrainsFromSource(sourceCode:String,destinationCode:String, date: String)
+    func updateFaviroteFlagFor(station: StationName)
 }
 
 protocol InteractorToPresenterProtocol: class {
-    var stationsList: [Station] {get set}
+    var stationsList: [StationName] {get set}
     var trainList:[StationTrain]? {get set}
-    func stationListFetched(list:[Station])
+    func stationListFetched(list:[StationName])
     func fetchedTrainsList(trainsList:[StationTrain]?)
     func showNoTrainAvailbilityFromSource()
     func showNoInterNetAvailabilityMessage()

@@ -9,12 +9,12 @@
 import UIKit
 
 class SearchTrainPresenter:ViewToPresenterProtocol {
-    var stationsList:[Station] = [Station]()
+    var stationsList:[StationName] = [StationName]()
     var trainList:[StationTrain]?
 
     func searchTapped(source: String, destination: String, date: String) {
-        let sourceStationCode = getStationCode(stationName: source)
-        let destinationStationCode = getStationCode(stationName: destination)
+        let sourceStationCode = source
+        let destinationStationCode = destination
         interactor?.fetchTrainsFromSource(sourceCode: sourceStationCode, destinationCode: destinationStationCode, date: date)
     }
     
@@ -28,7 +28,7 @@ class SearchTrainPresenter:ViewToPresenterProtocol {
 
     private func getStationCode(stationName:String)->String {
         let stationCode = stationsList.filter{$0.stationDesc == stationName}.first
-        return stationCode?.stationCode.lowercased() ?? ""
+        return stationCode?.stationCode?.lowercased() ?? ""
     }
 }
 
@@ -51,8 +51,12 @@ extension SearchTrainPresenter: InteractorToPresenterProtocol {
         }
     }
     
-    func stationListFetched(list: [Station]) {
+    func stationListFetched(list: [StationName]) {
         stationsList = list
         view!.saveFetchedStations(stations: list)
+    }
+    
+    func updateFaviroteFlagFor(station: StationName) {
+        interactor?.updateFaviroteFlagFor(station: station)
     }
 }

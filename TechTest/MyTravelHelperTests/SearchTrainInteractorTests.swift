@@ -31,7 +31,7 @@ class SearchTrainInteractorTests: XCTestCase {
         let source = "BFSTC"
         let destination = "LBURN"
         let expectation = self.expectation(description: "get train")
-        interactor.fetchTrainsFromSource(sourceCode: source, destinationCode: destination, date: Date().string(withFormat: "dd/MM/yyyy"))
+        interactor.fetchTrainsFromSource(sourceCode: source, destinationCode: destination, date: "04/07/2021")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             expectation.fulfill()
             XCTAssert((self.interactor.presenter?.trainList?.count ?? 0) > 0 , "failed to get train")
@@ -46,11 +46,11 @@ class SearchTrainInteractorTests: XCTestCase {
 }
 
 class SearchTrainPresenterMock: InteractorToPresenterProtocol {
+    var stationsList: [StationName] = []
     
-    var stationsList:[Station] = [Station]()
     var trainList:[StationTrain]?
 
-    func stationListFetched(list:[Station]) {
+    func stationListFetched(list:[StationName]) {
         self.stationsList = list
     }
     func fetchedTrainsList(trainsList:[StationTrain]?) {
@@ -62,4 +62,5 @@ class SearchTrainPresenterMock: InteractorToPresenterProtocol {
     func showNoInterNetAvailabilityMessage() {
         
     }
+
 }

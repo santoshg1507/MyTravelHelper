@@ -11,26 +11,30 @@ import SwiftSpinner
 import DropDown
 
 class SearchTrainViewController: BaseViewController {
+    
     @IBOutlet weak var destinationTextField: UITextField!
     @IBOutlet weak var sourceTxtField: UITextField!
-    @IBOutlet weak var trainsListTable: UITableView!
     @IBOutlet weak var dateTxtField: DatePickerTextField!
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var sourceBtn: UIButton!
+    @IBOutlet weak var destinationBtn: UIButton!
+    @IBOutlet weak var dateBtn: UIButton!
 
-    var stationsList:[Station] = [Station]()
+    var stationNameList:[StationName] = [StationName]()
     var trains:[StationTrain] = [StationTrain]()
     var presenter:ViewToPresenterProtocol?
-    var dropDown = DropDown()
     var transitPoints:(source:String,destination:String) = ("","")
+    var selectedStation: UIButton?
+    var searchFlag = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        trainsListTable.isHidden = true
-        self.dismissKeyboardOnTap()
         self.datePickerSetup()
+        self.tableView.tableFooterView = UIView()
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        if stationsList.count == 0 {
+        if stationNameList.count == 0 {
             SwiftSpinner.useContainerView(view)
             SwiftSpinner.show("general.loadingStation".localized())
             presenter?.fetchallStations()
@@ -38,7 +42,11 @@ class SearchTrainViewController: BaseViewController {
     }
 
     @IBAction func searchTrainsTapped(_ sender: Any) {
-        view.endEditing(true)
+        self.searchFlag = true
+        self.tableView.reloadData()
+        self.sourceBtn.backgroundColor = UIColor.clear
+        self.destinationBtn.backgroundColor = UIColor.clear
+        self.dateBtn.backgroundColor = UIColor.clear
         showProgressIndicator(view: self.view)
         presenter?.searchTapped(source: transitPoints.source, destination: transitPoints.destination, date: dateTxtField.selectedDate.string(withFormat: "dd/MM/yyyy"))
     }
@@ -47,13 +55,11 @@ class SearchTrainViewController: BaseViewController {
 extension SearchTrainViewController:PresenterToViewProtocol {
     
     func showNoInterNetAvailabilityMessage() {
-        trainsListTable.isHidden = true
         hideProgressIndicator(view: self.view)
         showAlert(title: "general.noInternet".localized(), message: "general.internetIssue".localized(), actionTitle: "general.Okay".localized())
     }
 
     func showNoTrainAvailbilityFromSource() {
-        trainsListTable.isHidden = true
         hideProgressIndicator(view: self.view)
         showAlert(title: "searchTrain.noTrain".localized(), message: "searchTrain.noTrainArrivingIn90min".localized(), actionTitle: "general.Okay".localized())
     }
@@ -61,14 +67,11 @@ extension SearchTrainViewController:PresenterToViewProtocol {
     func updateLatestTrainList(trainsList: [StationTrain]) {
         hideProgressIndicator(view: self.view)
         trains = trainsList
-        trainsListTable.isHidden = false
-        trainsListTable.reloadData()
+        tableView.reloadData()
     }
 
     func showNoTrainsFoundAlert() {
-        trainsListTable.isHidden = true
         hideProgressIndicator(view: self.view)
-        trainsListTable.isHidden = true
         showAlert(title: "searchTrain.noTrain".localized(), message: "searchTrain.noTrainFromSourceDestiIn90min".localized(), actionTitle: "general.Okay".localized())
     }
 
@@ -79,89 +82,119 @@ extension SearchTrainViewController:PresenterToViewProtocol {
     }
 
     func showInvalidSourceOrDestinationAlert() {
-        trainsListTable.isHidden = true
         hideProgressIndicator(view: self.view)
         showAlert(title: "searchTrain.invalidSourceDesti".localized(), message: "searchTrain.validationSourceDesti".localized(), actionTitle: "general.Okay".localized())
     }
 
-    func saveFetchedStations(stations: [Station]?) {
+    func saveFetchedStations(stations: [StationName]?) {
         if let _stations = stations {
-          self.stationsList = _stations
+          self.stationNameList = _stations
+            let arr1 = self.stationNameList.filter( { $0.favorite })
+            let arr2 = self.stationNameList.filter( { !$0.favorite })
+            self.stationNameList = arr1 + arr2
         }
+        self.tableView.reloadData()
         SwiftSpinner.hide()
-    }
-}
-
-extension SearchTrainViewController:UITextFieldDelegate {
-    
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        dropDown = DropDown()
-        dropDown.anchorView = textField
-        dropDown.direction = .bottom
-        dropDown.bottomOffset = CGPoint(x: 0, y:(dropDown.anchorView?.plainView.bounds.height)!)
-        dropDown.dataSource = stationsList.map {$0.stationDesc}
-        dropDown.selectionAction = { (index: Int, item: String) in
-            if textField == self.sourceTxtField {
-                self.transitPoints.source = item
-            }else {
-                self.transitPoints.destination = item
-                if self.dateTxtField.text!.isEmpty {
-                    self.dateTxtField.selectedDate = Date()
-                }
-            }
-            textField.text = item
-        }
-        dropDown.show()
-    }
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        dropDown.hide()
-        return textField.resignFirstResponder()
-    }
-    
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        if let inputedText = textField.text {
-            var desiredSearchText = inputedText
-            if string != "\n" && !string.isEmpty{
-                desiredSearchText = desiredSearchText + string
-            }else {
-                desiredSearchText = String(desiredSearchText.dropLast())
-            }
-
-            dropDown.dataSource = stationsList.map( { $0.stationDesc })
-            dropDown.show()
-            dropDown.reloadAllComponents()
-        }
-        return true
     }
 }
 
 extension SearchTrainViewController:UITableViewDataSource,UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return trains.count
+        if searchFlag {
+            return trains.count
+        }
+        else {
+            return stationNameList.count
+        }
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: TrainInfoCell.className, for: indexPath) as! TrainInfoCell
-        let train = trains[indexPath.row]
-        //cell.trainCode.text = train.trainCode
-        cell.souceInfoLabel.text = train.stationFullName
-        cell.sourceTimeLabel.text = train.expDeparture
-        if let _destinationDetails = train.destinationDetails {
-            cell.destinationInfoLabel.text = _destinationDetails.locationFullName
-            cell.destinationTimeLabel.text = _destinationDetails.expDeparture
+        
+        if searchFlag {
+            let cell = tableView.dequeueReusableCell(withIdentifier: TrainInfoCell.className, for: indexPath) as! TrainInfoCell
+            let train = trains[indexPath.row]
+            cell.configureCell(train: train)
+            return cell
         }
-        return cell
+        else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: StationTableViewCell.className, for: indexPath) as! StationTableViewCell
+            let station = self.stationNameList[indexPath.row]
+            cell.configureCell(station: station)
+            cell.delegate = self
+            return cell
+        }
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 140
+        return UITableView.automaticDimension
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let station = self.stationNameList[indexPath.row]
+        if self.selectedStation?.tag == 0 {
+            self.sourceTxtField.text = station.stationDesc
+            self.transitPoints.source = station.stationCode ?? ""
+            self.onTappedTextFieldBtn(sender: self.destinationBtn)
+        }
+        else if self.selectedStation?.tag == 1 {
+            self.destinationTextField.text = station.stationDesc
+            self.transitPoints.destination = station.stationCode ?? ""
+            if self.dateTxtField.text!.isEmpty {
+                self.dateTxtField.selectedDate = Date()
+            }
+        }
+        else {
+            
+        }
+        
     }
 }
 
+//MARK: datepicker setup for date selection
 extension SearchTrainViewController {
     
     func datePickerSetup() {
         dateTxtField.setupDatePickerTextField(mode: .date, dateformat: "dd-MMM-yyyy", maxDate: Date().addDays(60), minDate: Date().addDays(-1) , selectionDelegate: nil)
+        dateTxtField.addToolbar()
+        self.onTappedTextFieldBtn(sender: self.sourceBtn)
     }
+    
+}
+
+//MARK: TextField selection function
+extension SearchTrainViewController {
+    
+    @IBAction func onTappedTextFieldBtn(sender: UIButton) {
+        if sender.tag == 0 {
+            self.sourceBtn.backgroundColor = UIColor.cyan.withAlphaComponent(0.2)
+            self.destinationBtn.backgroundColor = UIColor.clear
+            self.dateBtn.backgroundColor = UIColor.clear
+            self.selectedStation = sender
+        }
+        else if sender.tag == 1 {
+            self.destinationBtn.backgroundColor = UIColor.cyan.withAlphaComponent(0.2)
+            self.sourceBtn.backgroundColor = UIColor.clear
+            self.dateBtn.backgroundColor = UIColor.clear
+            self.selectedStation = sender
+        }
+        else {
+            self.dateBtn.backgroundColor = UIColor.cyan.withAlphaComponent(0.2)
+            self.sourceBtn.backgroundColor = UIColor.clear
+            self.destinationBtn.backgroundColor = UIColor.clear
+            self.selectedStation = sender
+            self.dateTxtField.becomeFirstResponder()
+        }
+        self.searchFlag = false
+        self.tableView.reloadData()
+    }
+}
+
+//MARK: update favirote flag function
+extension SearchTrainViewController: StationTableViewCellDelegate {
+    
+    func updateFaviroteFlagForStation(station: StationName) {
+        self.presenter?.updateFaviroteFlagFor(station: station)
+        self.tableView.reloadData()
+    }
+
 }

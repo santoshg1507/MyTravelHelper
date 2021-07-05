@@ -13,40 +13,46 @@ class SearchTrainInteractor: PresenterToInteractorProtocol {
     var _sourceStationCode = String()
     var _destinationStationCode = String()
     var presenter: InteractorToPresenterProtocol?
-    
+    let coreDataManager = CoreDataManager.shared()
+
     var urlSessionManager: URLSessionManagerProtocol = URLSessionManager()
 
     func fetchallStations() {
-        if Reach().isNetworkReachable() == true {
-            let url = URLConstants.getAllStationsXML
-            urlSessionManager.getApi(url: url) { (statusCode, data, error)  in
-                if let data = data {
-                    do {
-                        let station = try XMLDecoder().decode(Stations.self, from: data)
-                        self.presenter!.stationListFetched(list: station.stationsList)
-                    }
-                    catch (let error) {
-                        print(error.localizedDescription)
-                        DispatchQueue.main.async {
-                            self.presenter!.stationListFetched(list: [])
+        let stations = self.fetchStationsFromCoreData()
+        if stations.count > 0 {
+            self.presenter!.stationListFetched(list: stations)
+        }
+        else {
+            if Reach().isNetworkReachable() == true {
+                urlSessionManager.api(request: StationTrainRouter.getAllStations) { (statusCode, data, error)  in
+                    if let data = data {
+                        do {
+                            let station = try XMLDecoder().decode(Stations.self, from: data)
+                            let cd_stations = self.saveStationToCoreData(stations: station.stationsList)
+                            self.presenter!.stationListFetched(list: cd_stations)
+                        }
+                        catch (let error) {
+                            print(error.localizedDescription)
+                            DispatchQueue.main.async {
+                                self.presenter!.stationListFetched(list: [])
+                            }
                         }
                     }
+                    else {
+                        self.presenter!.stationListFetched(list: [])
+                    }
                 }
-                else {
-                    self.presenter!.stationListFetched(list: [])
-                }
+            } else {
+                self.presenter!.showNoInterNetAvailabilityMessage()
             }
-        } else {
-            self.presenter!.showNoInterNetAvailabilityMessage()
         }
     }
 
     func fetchTrainsFromSource(sourceCode:String,destinationCode:String, date: String) {
         _sourceStationCode = sourceCode
         _destinationStationCode = destinationCode
-        let urlString = URLConstants.getStationDataByCodeXML_withParam.addUrlParam(parameters: [sourceCode]) 
         if Reach().isNetworkReachable() {
-            urlSessionManager.getApi(url: urlString) { (statusCode, data, error)  in
+            urlSessionManager.api(request: StationTrainRouter.getStationDataByCode(stationCode: sourceCode)) { (statusCode, data, error)  in
                 if let data = data {
                     do {
                         let stationData = try XMLDecoder().decode(StationData.self, from: data)
@@ -61,7 +67,9 @@ class SearchTrainInteractor: PresenterToInteractorProtocol {
                     }
                 }
                 else {
-                    self.presenter!.stationListFetched(list: [])
+                    DispatchQueue.main.async {
+                        self.presenter!.showNoTrainAvailbilityFromSource()
+                    }
                 }
             }
         } else {
@@ -74,10 +82,9 @@ class SearchTrainInteractor: PresenterToInteractorProtocol {
         let group = DispatchGroup()
         
         for index  in 0..<trainsList.count {
-            group.enter()
-            let urlString = URLConstants.getTrainMovementsXML_withParam.addUrlParam(parameters: [trainsList[index].trainCode,date])
             if Reach().isNetworkReachable() {
-                urlSessionManager.getApi(url: urlString) { (statusCode, data, error)  in
+                group.enter()
+                urlSessionManager.api(request: StationTrainRouter.getTrainMovements(trainId: trainsList[index].trainCode, trainDate: date)) { (statusCode, data, error)  in
                     if let data = data {
                         do {
                             
@@ -110,3 +117,19 @@ class SearchTrainInteractor: PresenterToInteractorProtocol {
         }
     }
 }
+
+extension SearchTrainInteractor {
+    private func saveStationToCoreData(stations: [Station]) -> [StationName] {
+        return self.coreDataManager.saveStations(stations: stations)
+    }
+    
+    private func fetchStationsFromCoreData() -> [StationName] {
+        return coreDataManager.getStations()
+    }
+    
+    func updateFaviroteFlagFor(station: StationName) {
+        station.favorite = !station.favorite
+        coreDataManager.saveData()
+    }
+}
+

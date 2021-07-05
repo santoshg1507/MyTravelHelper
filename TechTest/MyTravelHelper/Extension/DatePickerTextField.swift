@@ -67,7 +67,7 @@ class DatePickerTextField: UITextField {
         self.inputAccessoryView = toolbar
         
     }
-    
+
     func setupDatePickerTextField(mode: UIDatePicker.Mode, dateformat: String, maxDate: Date, minDate: Date, selectionDelegate: DatePickerTextFieldDelegate?) {
         if #available(iOS 13.4, *) {
             datePicker.preferredDatePickerStyle = .wheels
@@ -90,6 +90,7 @@ class DatePickerTextField: UITextField {
         let result = formatter.string(from: selectedDate)
         self.text = result
         self.selectionDelegate?.getDate(self, date: datePicker.date)
+        self.resignFirstResponder()
         
     }
     

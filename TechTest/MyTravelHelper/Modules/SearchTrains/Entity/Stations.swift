@@ -21,7 +21,7 @@ struct Station: Codable {
     var stationLatitude: Double
     var stationLongitude: Double
     var stationCode: String
-    var stationId: Int
+    var stationId: Int16
 
     enum CodingKeys: String, CodingKey {
         case stationDesc = "StationDesc"

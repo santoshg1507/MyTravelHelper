@@ -23,13 +23,13 @@ enum NetworkError: Error, LocalizedError {
 protocol URLSessionManagerProtocol {
     func api(url: String, method: HTTPMethod,  headers: [String:String]?, parameters: [String:Any]?, completion: @escaping((Int, Data?, Error?)->Void))
     func getApi(url: String, completion: @escaping((Int, Data?, Error?)->Void))
+    func api(request: URLRequestConvertible, completion: @escaping((Int, Data?, Error?)->Void))
 }
 
 class URLSessionManager: URLSessionManagerProtocol {
     
     let session = URLSession.shared
 
-    
     func api(url: String, method: HTTPMethod,  headers: [String:String]? = nil, parameters: [String:Any]? = nil, completion: @escaping((Int, Data?, Error?)->Void)) {
         guard let url = URL(string: url) else { completion(600, nil, NetworkError.urlError); return }
         var request = URLRequest(url: url)
@@ -56,6 +56,14 @@ class URLSessionManager: URLSessionManagerProtocol {
         self.api(url: url, method: .get, headers: nil, parameters: nil) { (statusCode, data, error) in
             completion(statusCode, data,error)
         }
+    }
+    
+    func api(request: URLRequestConvertible, completion: @escaping((Int, Data?, Error?)->Void)) {
+        let urlRequest = request.asURLRequest()
+        let task = session.dataTask(with: urlRequest) { data, response, error in
+            completion((response as? HTTPURLResponse)?.statusCode ?? 600 , data,error)
+        }
+        task.resume()
     }
    
 }

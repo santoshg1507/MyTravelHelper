@@ -34,6 +34,7 @@ class SearchTrainPresenterTests: XCTestCase {
 
 
 class SearchTrainMockView:PresenterToViewProtocol {
+    
     var isSaveFetchedStatinsCalled = false
 
     func saveFetchedStations(stations: [Station]?) {
@@ -59,17 +60,30 @@ class SearchTrainMockView:PresenterToViewProtocol {
     func showNoInterNetAvailabilityMessage() {
 
     }
+    
+    func saveFetchedStations(stations: [StationName]?) {
+        
+    }
 }
 
 class SearchTrainInteractorMock:PresenterToInteractorProtocol {
+    
     var presenter: InteractorToPresenterProtocol?
 
     func fetchallStations() {
-        let station = Station(stationDesc: "Belfast Central", stationLatitude: 54.6123, stationLongitude: -5.91744, stationCode: "BFSTC", stationId: 228) 
+        let station = StationName()
+        station.stationId = 228
+        station.stationDesc = "Belfast Central"
+        station.stationLatitude = 54.6123
+        station.stationLongitude = -5.91744
         presenter?.stationListFetched(list: [station])
     }
 
     func fetchTrainsFromSource(sourceCode: String, destinationCode: String, date: String) {
 
+    }
+    
+    func updateFaviroteFlagFor(station: StationName) {
+        
     }
 }

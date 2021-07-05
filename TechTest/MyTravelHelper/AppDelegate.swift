@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,5 +18,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.rootViewController = notice
         return false
     }
+
 }
 
