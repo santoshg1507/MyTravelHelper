@@ -24,7 +24,8 @@ How to run the project :
 -> run 😄 😄 😄
 
 Completed task in Assignment
-Refactoring
-Added core data for storage
-Added favorite functionality  
-Unit Test Case for interactor
+
+1: Refactoring
+2: Added core data for storage
+3: Added favorite functionality  
+4: Unit Test Case for interactor
