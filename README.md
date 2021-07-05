@@ -22,3 +22,9 @@ How to run the project :
 -> install the pod 
 -> open in xcode(v12.4) 
 -> run 😄 😄 😄
+
+Completed task in Assignment
+Refactoring
+Added core data for storage
+Added favorite functionality  
+Unit Test Case for interactor
