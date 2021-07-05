@@ -122,13 +122,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2303CD77269386F9004B355C /* DataResource */ = {
+		2303CD77269386F9004B355C /* DataResources */ = {
 			isa = PBXGroup;
 			children = (
 				2303CD67269350C4004B355C /* CoreDataManager.swift */,
 				23CF6AE02690F494005F3BA8 /* URLSessionManager.swift */,
 			);
-			path = DataResource;
+			path = DataResources;
 			sourceTree = "<group>";
 		};
 		2303CD7826938873004B355C /* Network */ = {
@@ -212,7 +212,7 @@
 		753F0845223618AB00175107 /* MyTravelHelper */ = {
 			isa = PBXGroup;
 			children = (
-				2303CD77269386F9004B355C /* DataResource */,
+				2303CD77269386F9004B355C /* DataResources */,
 				23CF6ACF2690EC55005F3BA8 /* Extension */,
 				753C8FB822367E64005FF13B /* App-Ui */,
 				753F086F22361A5100175107 /* App-utils */,
